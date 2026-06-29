@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Find Hostel - Kwathu</title>
+<style>
+:root{--primary:#1e3a8a;--accent:#0d9488;--bg:#f8fafc;--card:#fff;--text:#0f172a;--muted:#64748b;--border:#e2e8f0;--search:#0f172a;--dark:#111827}
+*{box-sizing:border-box;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+body.loading *{visibility:hidden}
+.container{max-width:1000px;margin:0 auto;padding:16px;width:100%;flex:1}
+.header{display:flex;align-items:center;gap:12px;padding:12px 0 16px;position:sticky;top:0;background:var(--bg);z-index:20;border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:800;color:var(--primary);text-decoration:none}
+.logo img{height:32px;width:auto}
+.landlord-link{margin-left:auto;font-size:13px;color:var(--primary);font-weight:600;text-decoration:none;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:10px}
+.search-wrap{position:relative;margin:12px 0 16px;max-width:600px}
+.search-bar{display:flex;gap:8px}
+.search-input{flex:1;padding:14px 16px 14px 44px;background:var(--search);color:#fff;border:0;border-radius:14px;font-size:15px;outline:none;box-shadow:0 4px 20px rgba(15,23,42,.15)}
+.search-input::placeholder{color:#94a3b8}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#94a3b8;pointer-events:none}
+.btn-search{padding:0 20px;background:var(--primary);color:#fff;border:0;border-radius:14px;font-weight:700;cursor:pointer}
+.filters{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;max-width:600px}
+@media(min-width:768px){.grid{grid-template-columns:repeat(3,1fr)}}
+select,input[type=number]{padding:12px;background:var(--card);border:1px solid var(--border);border-radius:10px;width:100%;font-size:14px}
+.grid{display:grid;gap:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:.2s}
+.card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.06)}
+.card img{width:100%;height:180px;object-fit:cover;cursor:pointer}
+.card-body{padding:12px}
+.card-title{font-weight:700;font-size:16px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.muted{font-size:13px;color:var(--muted)}
+.price{font-size:18px;font-weight:800;color:var(--accent);margin-top:4px}
+.card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.tag{display:inline-block;font-size:11px;background:rgba(13,148,136,.1);color:var(--accent);padding:4px 8px;border-radius:20px;font-weight:600}
+.like-btn{background:var(--dark);color:#fff;border:0;padding:6px 10px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;transition:.2s}
+.like-btn.liked{background:var(--accent)}
+.like-btn:hover{opacity:.9}
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+footer{width:100%;background:var(--card);border-top:1px solid var(--border);margin-top:auto}
+.footer-inner{max-width:960px;margin:0 auto;padding:20px 24px;text-align:center}
+.brand{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px}
+.brand span{color:var(--accent)}
+.footer-links{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+.footer-links a{font-size:12px;color:var(--muted);text-decoration:none;font-weight:600}
+.copy{font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body class="loading">
+<div class="container">
+  <header class="header">
+    <a href="index.html" class="logo">
+      <img src="Kwathu-campus-logo.png" alt="Kwathu" onerror="this.style.display='none'">
+      Kwathu Campus
+    </a>
+    <a href="landlord-auth.html" class="landlord-link">Landlord</a>
+  </header>
+
+  <div class="search-wrap">
+    <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <div class="search-bar">
+      <input type="text" id="searchInput" class="search-input" placeholder="Search hostel name, location, university...">
+      <button class="btn-search" id="searchBtn">Search</button>
+    </div>
+  </div>
+
+  <div class="filters">
+    <select id="uniFilter"><option value="">All Universities</option><option>MUBAS</option><option>UNIMA</option><option>MZUNI</option><option>LUANAR</option><option>LAMAU</option></select>
+    <select id="roomFilter"><option value="">All Rooms</option><option>Single</option><option>Shared 2</option><option>Shared 3+</option><option>Self Contained</option></select>
+    <input type="number" id="maxPrice" placeholder="Max Price MK">
+  </div>
+
+  <div id="list" class="grid"><div class="empty">Loading hostels...</div></div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="brand">@Lost Loyalty <span>Development</span></div>
+    <div class="footer-links">
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms & Conditions</a>
+      <a href="https://lostloyalty.dev" target="_blank" rel="noopener">Contact</a>
+    </div>
+    <div class="copy">© 2026 Kwathu Campus. All rights reserved.</div>
+  </div>
+</footer>
+
+<script type="module">
+import { Client, Account, Databases, Query } from 'https://cdn.jsdelivr.net/npm/appwrite@14.0.1/+esm'
+
+const ENDPOINT = 'https://fra.cloud.appwrite.io/v1';
+const PROJECT_ID = 'kwathucampus';
+const DATABASE_ID = 'Kwathuhostel';
+const HOSTELS_COLLECTION = 'hostels';
+const LIKES_COLLECTION = 'hostel_likes'; // NEW
+
+const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID);
+const account = new Account(client);
+const databases = new Databases(client);
+
+let allHostels = [];
+let userId = null;
+let userLikes = []; // [$hostel_id]
+
+(async ()=>{ // FIX: Loading gate + get user for likes
+  try{
+    const user = await account.get();
+    userId = user.$id;
+    const likeRes = await databases.listDocuments(DATABASE_ID, LIKES_COLLECTION, [Query.equal('user_id', userId), Query.limit(100)]);
+    userLikes = likeRes.documents.map(d=>d.hostel_id);
+  }catch{ userId = null } // Student not logged in = can still browse
+  await load();
+  document.body.classList.remove('loading');
+})();
+
+const searchInput=document.getElementById('searchInput');
+const uniFilter=document.getElementById('uniFilter');
+const roomFilter=document.getElementById('roomFilter');
+const maxPrice=document.getElementById('maxPrice');
+const list=document.getElementById('list');
+
+async function load(){
+  try{
+    const res = await databases.listDocuments(DATABASE_ID, HOSTELS_COLLECTION, [Query.equal('status', 'available'), Query.orderDesc('$createdAt'), Query.limit(100)]);
+    allHostels = res.documents || [];
+    render(allHostels);
+  }catch(err){
+    list.innerHTML='<div class="empty">Error loading hostels</div>';
+  }
+}
+
+function render(hostels){
+  if(!hostels||hostels.length===0){list.innerHTML='<div class="empty">No hostels found</div>';return;}
+  list.innerHTML=hostels.map(h=>`
+    <div class="card">
+      <img src="${h.images?.[0]||'https://placehold.co/600x400/e2e8f0/64748b?text=No+Pic'}" alt="${h.name}" onclick="location='hostel.html?id=${h.$id}'">
+      <div class="card-body">
+        <div class="card-title" onclick="location='hostel.html?id=${h.$id}'">${h.name}</div>
+        <div class="muted">${h.university} • ${h.location}</div>
+        <div class="price">MK ${Number(h.price).toLocaleString()}/month</div>
+        <div class="card-footer">
+          <span class="tag">${h.room_type}</span>
+          <button class="like-btn ${userLikes.includes(h.$id)?'liked':''}" onclick="toggleLike('${h.$id}', this)">
+            ❤️ <span id="like-count-${h.$id}">${h.likes_count||0}</span>
+          </button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+window.toggleLike=async(hostelId, btn)=>{
+  if(!userId){alert('Login to like hostels'); location='landlord-auth.html'; return;} // Or student-auth.html
+  const liked = btn.classList.contains('liked');
+  const countEl = document.getElementById(`like-count-${hostelId}`);
+  let count = Number(countEl.textContent);
+
+  try{
+    if(liked){
+      const res = await databases.listDocuments(DATABASE_ID, LIKES_COLLECTION, [Query.equal('user_id', userId), Query.equal('hostel_id', hostelId)]);
+      if(res.documents[0]) await databases.deleteDocument(DATABASE_ID, LIKES_COLLECTION, res.documents[0].$id);
+      await databases.updateDocument(DATABASE_ID, HOSTELS_COLLECTION, hostelId, {likes_count: count-1});
+      countEl.textContent = count-1;
+      btn.classList.remove('liked');
+    }else{
+      await databases.createDocument(DATABASE_ID, LIKES_COLLECTION, ID.unique(), {user_id: userId, hostel_id: hostelId});
+      await databases.updateDocument(DATABASE_ID, HOSTELS_COLLECTION, hostelId, {likes_count: count+1});
+      countEl.textContent = count+1;
+      btn.classList.add('liked');
+    }
+  }catch(err){ alert('Like failed: '+err.message) }
+};
+
+function applyFilters(){
+  const term=searchInput.value.toLowerCase().trim();
+  const uni=uniFilter.value;
+  const room=roomFilter.value;
+  const price=maxPrice.value?Number(maxPrice.value):999;
+  let filtered=allHostels.filter(h=>{
+    const matchText=`${h.name} ${h.location} ${h.university} ${h.room_type}`.toLowerCase().includes(term);
+    const matchUni=uni?h.university===uni:true;
+    const matchRoom=room?h.room_type===room:true;
+    const matchPrice=Number(h.price)<=price;
+    return matchText&&matchUni&&matchRoom&&matchPrice;
+  });
+  render(filtered);
+}
+searchInput.oninput=applyFilters;
+document.getElementById('searchBtn').onclick=applyFilters;
+uniFilter.onchange=applyFilters;
+roomFilter.onchange=applyFilters;
+maxPrice.oninput=applyFilters;
+
+const savedUni = localStorage.getItem('kwathu_uni');
+if(savedUni){ uniFilter.value = savedUni; }
+</script>
+</body>
+</html>=applyFilters;
+
+window.openModal=h=>{
+  const imgs=h.images?.length?h.images:[`https://placehold.co/600x400/e2e8f0/64748b?text=No+Pic`];
+  document.getElementById('modalContent').innerHTML=`
+    <div class="modal-head">
+      <img src="${imgs[0]}" alt="${h.name}">
+      <button class="close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-title">${h.name}</div>
+      <div class="muted" style="margin-bottom:12px">${h.location}, ${h.university}</div>
+      ${imgs.length>1?`<div class="gallery">${imgs.map(u=>`<img src="${u}">`).join('')}</div>`:''}
+      <div class="detail-grid">
+        <div class="detail-item"><div class="detail-label">Price</div><div class="detail-value" style="color:var(--accent)">MK ${Number(h.price).toLocaleString()}/mo</div></div>
+        <div class="detail-item"><div class="detail-label">Room Type</div><div class="detail-value">${h.room_type}</div></div>
+        <div class="detail-item"><div class="detail-label">University</div><div class="detail-value">${h.university}</div></div>
+        <div class="detail-item"><div class="detail-label">Landlord</div><div class="detail-value">${h.landlord_name||'Kwathu'}</div></div>
+      </div>
+      <a class="btn-whatsapp" href="https://wa.me/${(h.landlord_phone||'').replace(/\D/g,'')}?text=Hi ${h.landlord_name||''}, I'm interested in ${h.name} at MK${h.price}/month" target="_blank">📱 Contact on WhatsApp</a>
+    </div>`;
+  document.getElementById('modal').classList.add('open');
+}
+window.closeModal=()=>document.getElementById('modal').classList.remove('open');
+
+// Pre-fill uni from select-campus.html
+const savedUni = localStorage.getItem('kwathu_uni');
+if(savedUni){ uniFilter.value = savedUni; }
+
+load();
+</script>
+</body>
+</html>>
+</body>
+</html>

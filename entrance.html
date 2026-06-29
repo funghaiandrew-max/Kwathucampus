@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kwathu Campus - Select Campus</title>
+  
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --accent: #0d9488;
+      --bg: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+    }
+
+    * {box-sizing: border-box;margin: 0;padding: 0;font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;}
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 20px;
+      gap: 24px;
+    }
+
+    .app-header {
+      width: 100%;
+      max-width: 600px; /* Desktop wider */
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .app-logo {
+      height: clamp(60px, 10vw, 90px); /* Responsive logo */
+      width: auto;
+      object-fit: contain;
+    }
+
+    .main-container {
+      width: 100%;
+      max-width: 600px; /* Desktop wider */
+      background: var(--card);
+      border-radius: 20px;
+      padding: clamp(20px, 4vw, 40px); /* Responsive padding */
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--border);
+    }
+
+    h2 {
+      font-size: clamp(20px, 3vw, 28px); /* Responsive text */
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: var(--primary);
+    }
+
+    .step-desc {
+      font-size: clamp(14px, 1.8vw, 16px);
+      color: var(--muted);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .dropdown-trigger {
+      width: 100%;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--card);
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s;
+    }
+
+    .dropdown-trigger:hover, .dropdown-trigger.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+    }
+
+    .dropdown-arrow {transition: transform 0.3s;}
+    .dropdown-trigger.active .dropdown-arrow {transform: rotate(180deg);}
+
+    .dropdown-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(6px);
+      z-index: 9999;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .dropdown-modal.active {display: flex;animation: fadeIn 0.2s ease;}
+    @keyframes fadeIn {from { opacity: 0; } to { opacity: 1; }}
+
+    .dropdown-content {
+      width: 100%;
+      max-width: 600px; /* Desktop wider */
+      background: var(--card);
+      border-radius: 20px 20px 0 0;
+      border: 1px solid var(--border);
+      max-height: 70vh;
+      overflow: hidden;
+      animation: slideUp 0.3s ease;
+    }
+    @media(min-width: 768px){.dropdown-content{border-radius:20px}} /* Desktop modal center */
+    @keyframes slideUp {from { transform: translateY(100%); } to { transform: translateY(0); }}
+    @media(min-width: 768px){@keyframes slideUp {from { transform: scale(0.95); opacity:0;} to { transform: scale(1); opacity:1; }}}
+
+    .dropdown-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dropdown-title {font-size: 18px;font-weight: 700;color: var(--primary);}
+    .close-btn {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .search-box {padding: 12px 20px;border-bottom: 1px solid var(--border);}
+    .search-input {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 15px;
+      outline: none;
+    }
+    .search-input:focus {border-color: var(--accent);}
+
+    .uni-list {overflow-y: auto;max-height: calc(70vh - 140px);padding: 8px;}
+    .uni-group {margin-bottom: 16px;}
+    .group-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 8px 12px;
+      opacity: 0.7;
+    }
+
+    .uni-item {
+      padding: 14px 12px;
+      margin: 4px 0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .uni-item:hover {background: rgba(13, 148, 136, 0.08);}
+    .uni-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 12px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .uni-info {flex: 1;}
+    .uni-name {font-weight: 600;font-size: 15px;margin-bottom: 2px;}
+    .uni-location {font-size: 12px;color: var(--muted);}
+
+    .selected-badge {
+      display: none;
+      background: rgba(13, 148, 136, 0.1);
+      color: var(--accent);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      width: fit-content;
+      border: 1px solid rgba(13, 148, 136, 0.2);
+    }
+
+    .gate-buttons {display: flex;flex-direction: column;gap: 12px;margin-top: 20px;}
+    @media(min-width: 768px){.gate-buttons{flex-direction:row}} /* Desktop side by side */
+    .gate-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      text-align: left;
+      cursor: not-allowed;
+      opacity: 0.4;
+      transition: all 0.3s;
+      position: relative;
+      flex:1; /* Desktop equal width */
+    }
+    .gate-card.active {cursor: pointer;opacity: 1;background: var(--card);}
+    .gate-card.active:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(13, 148, 136, 0.15);
+    }
+    .gate-card.loading::after {
+      content: '';
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--accent);
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin {to { transform: rotate(360deg); }}
+    .gate-title {font-size: 16px;font-weight: 700;color: var(--text);margin-bottom: 4px;}
+    .gate-desc {font-size: 13px;color: var(--muted);line-height: 1.5;}
+    .hidden {display: none !important;}
+  </style>
+</head>
+<body>
+
+  <header class="app-header">
+    <img src="Kwathu-campus-logo.png" alt="Kwathu Campus Logo" class="app-logo">
+  </header>
+
+  <main class="main-container">
+    <h2>Select Your Campus</h2>
+    <p class="step-desc">Choose your university to unlock hostels, roommates, and deals near you.</p>
+
+    <div id="selectedBadge" class="selected-badge"></div>
+
+    <div class="dropdown-trigger" id="dropdownTrigger">
+      <span id="selectedText">-- Choose your University --</span>
+      <span class="dropdown-arrow">▼</span>
+    </div>
+
+    <div class="gate-buttons">
+      <div class="gate-card" id="student-gate">
+        <div class="gate-title">🎓 Student Entry</div>
+        <div class="gate-desc">Browse verified hostels near your campus. Free forever. No signup needed.</div>
+      </div>
+
+      <div class="gate-card" id="landlord-gate">
+        <div class="gate-title">🏠 Landlord Portal</div>
+        <div class="gate-desc">List rooms, manage bookings, and get verified tenant leads.</div>
+      </div>
+    </div>
+  </main>
+
+  <div class="dropdown-modal" id="dropdownModal">
+    <div class="dropdown-content">
+      <div class="dropdown-header">
+        <div class="dropdown-title">Select University</div>
+        <button class="close-btn" onclick="closeDropdown()">×</button>
+      </div>
+      
+      <div class="search-box">
+        <input type="text" class="search-input" id="uniSearch" placeholder="Search universities...">
+      </div>
+
+      <div class="uni-list" id="uniList">
+        <!-- Your uni list unchanged -->
+        <div class="uni-group">
+          <div class="group-label">BLANTYRE</div>
+          <div class="uni-item" data-value="MUBAS" data-name="MUBAS" data-location="Blantyre">
+            <div class="uni-icon">MB</div>
+            <div class="uni-info"><div class="uni-name">MUBAS</div><div class="uni-location">Malawi University of Business</div></div>
+          </div>
+          <div class="uni-item" data-value="KUHES-BT" data-name="KUHeS Blantyre" data-location="Blantyre">
+            <div class="uni-icon">KH</div>
+            <div class="uni-info"><div class="uni-name">KUHeS</div><div class="uni-location">Blantyre Campus</div></div>
+          </div>
+        </div>
+        <div class="uni-group">
+          <div class="group-label">LILONGWE</div>
+          <div class="uni-item" data-value="LUANAR" data-name="LUANAR" data-location="Lilongwe">
+            <div class="uni-icon">LN</div>
+            <div class="uni-info"><div class="uni-name">LUANAR</div><div class="uni-location">Natural Resources</div></div>
+          </div>
+        </div>
+        <div class="uni-group">
+          <div class="group-label">CAN'T FIND IT?</div>
+          <div class="uni-item" data-value="SUGGEST_NEW" data-name="Other" data-location="">
+            <div class="uni-icon">➕</div>
+            <div class="uni-info"><div class="uni-name">Request Your University</div><div class="uni-location">Type it in next</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script type="module">
+  import { Client, Databases, ID } from 'https://cdn.jsdelivr.net/npm/appwrite@14.0.1/+esm'
+  
+  // TODO: Fill these 3 from Appwrite Console
+  const ENDPOINT = 'https://fra.cloud.appwrite.io/v1';
+  const PROJECT_ID = 'kwathucampus'; 
+  const DATABASE_ID = 'Kwathuhostel'; // Create this in Appwrite
+  const COLLECTION_ID = 'requests'; // Create this collection
+
+  const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID);
+  const databases = new Databases(client);
+
+  const dropdownTrigger = document.getElementById('dropdownTrigger');
+  const dropdownModal = document.getElementById('dropdownModal');
+  const selectedText = document.getElementById('selectedText');
+  const uniSearch = document.getElementById('uniSearch');
+  const studentGate = document.getElementById('student-gate');
+  const landlordGate = document.getElementById('landlord-gate');
+  const selectedBadge = document.getElementById('selectedBadge');
+
+  let selectedUni = '';
+
+  dropdownTrigger.addEventListener('click', () => {
+    dropdownModal.classList.add('active');
+    dropdownTrigger.classList.add('active');
+    uniSearch.focus();
+  });
+
+  window.closeDropdown = () => {
+    dropdownModal.classList.remove('active');
+    dropdownTrigger.classList.remove('active');
+  }
+
+  dropdownModal.addEventListener('click', (e) => {
+    if(e.target === dropdownModal) closeDropdown();
+  });
+
+  uniSearch.addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase();
+    document.querySelectorAll('.uni-item').forEach(item => {
+      const name = item.dataset.name.toLowerCase();
+      const location = item.dataset.location.toLowerCase();
+      item.classList.toggle('hidden', !(name.includes(query) || location.includes(query)));
+    });
+  });
+
+  document.querySelectorAll('.uni-item').forEach(item => {
+    item.addEventListener('click', async () => {
+      const value = item.dataset.value;
+      const name = item.dataset.name;
+      
+      if(value === 'SUGGEST_NEW') {
+        const customUni = prompt('Enter your University name:');
+        if(!customUni || customUni.length < 3){ closeDropdown(); return; }
+        selectedUni = customUni.trim();
+        await saveRequest(selectedUni);
+      } else {
+        selectedUni = name;
+      }
+      
+      selectedText.textContent = selectedUni;
+      activateGates();
+      saveSelection(selectedUni);
+      selectedBadge.textContent = `✓ ${selectedUni}`;
+      selectedBadge.style.display = 'block';
+      
+      closeDropdown();
+      uniSearch.value = '';
+      document.querySelectorAll('.uni-item').forEach(i => i.classList.remove('hidden'));
+    });
+  });
+
+  function activateGates() {
+    studentGate.classList.add('active');
+    landlordGate.classList.add('active');
+  }
+
+  function saveSelection(uni) {
+    localStorage.setItem('kwathu_uni', uni);
+  }
+
+  async function saveRequest(name){
+    try {
+      await databases.createDocument(
+        DATABASE_ID,
+        COLLECTION_ID,
+        ID.unique(),
+        { name: name, source: 'setup_page' }
+      );
+    } catch(error) {
+      console.error('Request save error:', error.message);
+    }
+  }
+
+  window.addEventListener('load', () => {
+    const saved = localStorage.getItem('kwathu_uni');
+    if(saved) {
+      selectedUni = saved;
+      selectedText.textContent = saved;
+      selectedBadge.textContent = `✓ ${saved}`;
+      selectedBadge.style.display = 'block';
+      activateGates();
+    }
+  });
+
+  function sanitizeUni(str) {
+    return encodeURIComponent(str.replace(/<[^>]*>/g, '').trim());
+  }
+
+  studentGate.addEventListener('click', async function() {
+    if (!this.classList.contains('active')) return;
+    this.classList.add('loading');
+    setTimeout(() => {
+      window.location.href = `browse.html?uni=${sanitizeUni(selectedUni)}`;
+    }, 300);
+  });
+
+  landlordGate.addEventListener('click', function() {
+    if (!this.classList.contains('active')) return;
+    this.classList.add('loading');
+    localStorage.setItem('kwathu_uni', selectedUni);
+    localStorage.setItem('kwathu_role', 'landlord');
+    setTimeout(() => {
+      window.location.href = 'landlord-auth.html';
+    }, 300);
+  });
+</script>
+</body>
+</html>);
+</script>
+</body>
+</html>

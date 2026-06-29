@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Post Hostel - Kwathu</title>
+<style>
+:root {
+  --primary: #1e3a8a; --accent: #0d9488;
+  --bg: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  --card: #ffffff; --text: #0f172a; --muted: #64748b; --border: #e2e8f0; --danger: #ef4444;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+body.loading *{visibility:hidden} /* FIX: Hide until auth passes */
+.wrap{width:100%;max-width:600px;margin:20px auto;padding:20px;flex:1}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.header h1{font-size:clamp(22px,4vw,28px);font-weight:800;color:var(--primary)}
+.logout{font-size:14px;color:var(--muted);cursor:pointer;font-weight:600}
+.logout:hover{color:var(--accent)}
+.card{background:var(--card);border-radius:16px;padding:24px;border:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,.06)}
+label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:16px 0 6px}
+input,select{width:100%;padding:14px;border:1px solid var(--border);border-radius:12px;font-size:15px;background:var(--card);color:var(--text);outline:none}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(13,148,136,.1)}
+button.btn{width:100%;padding:16px;margin-top:24px;border:0;border-radius:12px;background:var(--primary);color:#fff;font-weight:800;font-size:16px;cursor:pointer;transition:.2s}
+button.btn:hover{background:#1e40af}
+button.btn:disabled{opacity:.5;cursor:not-allowed}
+.upload-box{border:2px dashed var(--border);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:.2s;background:var(--bg)}
+.upload-box:hover{border-color:var(--accent)}
+.upload-box input{display:none}
+.pic-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+@media(min-width:768px){.pic-grid{grid-template-columns:repeat(5,1fr)}}
+.pic{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+.pic img{width:100%;height:100%;object-fit:cover}
+.pic button{position:absolute;top:4px;right:4px;background:var(--danger);color:#fff;border:0;width:24px;height:24px;border-radius:50%;cursor:pointer;font-weight:800}
+.count{font-size:12px;color:var(--muted);margin-top:6px;text-align:center}
+.error{color:var(--danger);font-size:13px;margin-top:10px;text-align:center;font-weight:600;display:none}
+.ok{color:var(--accent);font-size:13px;margin-top:10px;text-align:center;font-weight:600}
+footer{width:100%;background:var(--card);border-top:1px solid var(--border);margin-top:auto}
+.footer-inner{max-width:960px;margin:0 auto;padding:20px 24px;text-align:center}
+.brand{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px}
+.brand span{color:var(--accent)}
+.footer-links{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+.footer-links a{font-size:12px;color:var(--muted);text-decoration:none;font-weight:600}
+.footer-links a:hover{color:var(--accent);text-decoration:underline}
+.copy{font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body class="loading"> <!-- FIX: Start hidden -->
+<div class="wrap">
+  <div class="header">
+    <h1>List Hostel</h1>
+    <div class="logout" id="logout">Logout</div>
+  </div>
+
+  <form class="card" id="form">
+    <label>Hostel Name *</label>
+    <input name="name" required placeholder="e.g. Chitawila Hostel">
+
+    <label>University *</label>
+    <select name="uni" required>
+      <option value="">-- Select --</option>
+      <option>MUBAS</option><option>UNIMA</option><option>LUANAR</option>
+      <option>MZUNI</option><option>MUST</option><option>KUHeS</option>
+      <option>LAMAU</option><option>BIU</option><option>CUNIMA</option>
+      <option>Daeyang University</option><option>MAGU</option>
+    </select>
+
+    <label>Location *</label>
+    <input name="location" required placeholder="e.g. Area 47 sector 2">
+
+    <label>Price MK/month *</label>
+    <input name="price" type="number" min="1000" required placeholder="50000">
+
+    <label>Room Type *</label>
+    <select name="room" required>
+      <option>Single</option><option>Shared 2</option><option>Shared 3+</option><option>Self Contained</option>
+    </select>
+
+    <label>Photos - 2 to 5 Required *</label>
+    <div class="upload-box" onclick="document.getElementById('pics').click()">
+      <input id="pics" type="file" accept="image/*" multiple>
+      <div>📸 Tap to add photos</div>
+      <div class="count" id="picCount">0 / 5 selected</div>
+    </div>
+    <div class="pic-grid" id="preview"></div>
+    <div class="error" id="err"></div>
+
+    <button class="btn" id="submitBtn">Post Hostel</button>
+  </form>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="brand">@Lost Loyalty <span>Development</span></div>
+    <div class="footer-links">
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms & Conditions</a>
+      <a href="https://lostloyalty.dev" target="_blank" rel="noopener">Contact</a>
+    </div>
+    <div class="copy">© 2026 Kwathu Campus. All rights reserved.</div>
+  </div>
+</footer>
+
+<script type="module">
+import { Client, Account, Databases, Storage, ID, Query } from 'https://cdn.jsdelivr.net/npm/appwrite@14.0.1/+esm'
+
+const ENDPOINT = 'https://fra.cloud.appwrite.io/v1';
+const PROJECT_ID = 'kwathucampus';
+const DATABASE_ID = 'Kwathuhostel';
+const HOSTELS_COLLECTION = 'hostels';
+const LANDLORDS_COLLECTION = 'landlords'; // FIX: Removed underscore
+const BUCKET_ID = 'hostel_images';
+
+const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID);
+const account = new Account(client);
+const databases = new Databases(client);
+const storage = new Storage(client);
+
+let landlordDocId = null;
+let landlordName = '';
+let landlordPhone = '';
+
+// FIX: Wrap auth in IIFE + loading gate
+(async ()=>{
+  try{
+    const { $id: userId } = await account.get();
+    const res = await databases.listDocuments(DATABASE_ID, LANDLORDS_COLLECTION, [Query.equal('user_id', userId), Query.limit(1)]);
+    if(res.documents.length===0){ throw new Error('No landlord profile'); }
+    landlordDocId = res.documents[0].$id;
+    landlordName = res.documents[0].name;
+    landlordPhone = res.documents[0].phone;
+    document.body.classList.remove('loading'); // Show page
+  }catch{
+    location='landlord-auth.html';
+  }
+})();
+
+document.getElementById('logout').onclick = async()=>{ await account.deleteSession('current'); location='landlord-auth.html' }
+
+let filesArray = [];
+const pics = document.getElementById('pics');
+const preview = document.getElementById('preview');
+const picCount = document.getElementById('picCount');
+const err = document.getElementById('err');
+const btn = document.getElementById('submitBtn');
+
+pics.onchange = e=>{
+  const newFiles = Array.from(e.target.files);
+  const total = filesArray.length + newFiles.length;
+  if(total > 5){ showErr('Max 5 photos only'); pics.value = ''; return; }
+  filesArray = [...filesArray,...newFiles];
+  renderPreview();
+  pics.value = '';
+  hideErr();
+}
+
+function renderPreview(){
+  picCount.textContent = `${filesArray.length} / 5 selected`;
+  picCount.className = filesArray.length >= 2? 'ok' : 'count';
+  preview.innerHTML = filesArray.map((f,i)=>`
+    <div class="pic">
+      <img src="${URL.createObjectURL(f)}">
+      <button type="button" onclick="removePic(${i})">×</button>
+    </div>
+  `).join('');
+}
+window.removePic = i=>{ filesArray.splice(i,1); renderPreview(); }
+
+function showErr(msg){ err.textContent = msg; err.style.display='block'; }
+function hideErr(){ err.style.display='none'; }
+
+document.getElementById('form').onsubmit = async(e)=>{
+  e.preventDefault();
+  hideErr();
+
+  if(filesArray.length < 2){ showErr('Add at least 2 photos'); return; }
+  if(filesArray.length > 5){ showErr('Max 5 photos only'); return; }
+
+  btn.disabled = true; btn.textContent = 'Uploading...';
+
+  const imageUrls = [];
+  try{
+    for(const file of filesArray){
+      const fileId = ID.unique();
+      await storage.createFile(BUCKET_ID, fileId, file);
+      const url = storage.getFileView(BUCKET_ID, fileId).href;
+      imageUrls.push(url);
+    }
+  }catch(uploadErr){
+    showErr('Upload failed: '+uploadErr.message);
+    btn.disabled=false; btn.textContent='Post Hostel';
+    return;
+  }
+
+  const f = e.target;
+  try{
+    await databases.createDocument(DATABASE_ID, HOSTELS_COLLECTION, ID.unique(), {
+      name: f.name.value.trim(),
+      university: f.uni.value,
+      location: f.location.value.trim(),
+      price: Number(f.price.value),
+      room_type: f.room.value,
+      images: imageUrls,
+      landlord_id: landlordDocId,
+      landlord_name: landlordName,
+      landlord_phone: landlordPhone,
+      status: 'available'
+    });
+    alert('Hostel Posted ✅');
+    location='landlord-dashboard.html';
+  }catch(dbErr){
+    showErr('DB Error: '+dbErr.message);
+    btn.disabled=false; btn.textContent='Post Hostel';
+  }
+}
+</script>
+</body>
+</html>

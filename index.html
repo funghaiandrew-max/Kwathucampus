@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kwathu Campus - Welcome</title>
+  <style>
+    :root{
+      --primary:#1e3a8a;--accent:#0d9488;--bg:linear-gradient(135deg,#f8fafc 0%,#e2e8f0 100%);
+      --card:#fff;--text-dark:#0f172a;--text-muted:#64748b;--border:#e2e8f0
+    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
+    body{
+      background:var(--bg);color:var(--text-dark);min-height:100vh;
+      display:flex;flex-direction:column;justify-content:space-between;align-items:center
+    }
+    .main-wrap{width:100%;display:flex;flex-direction:column;align-items:center;padding:24px 20px;gap:40px;flex:1;justify-content:center}
+    .app-header{width:100%;max-width:400px;text-align:center}
+    .app-logo{height:120px;width:auto;object-fit:contain;margin-bottom:8px}
+    .welcome-hero{width:100%;max-width:600px;text-align:center} /* Desktop wider */
+    .welcome-hero h1{font-size:clamp(28px, 5vw, 44px);font-weight:800;line-height:1.2;color:var(--primary);margin-bottom:16px} /* Responsive text */
+    .welcome-hero p{font-size:clamp(15px, 2vw, 18px);color:var(--text-muted);line-height:1.6;margin-bottom:32px;max-width:500px;margin-inline:auto}
+    .btn-start{width:100%;max-width:400px;background-color:var(--primary);color:#fff;border:0;padding:18px;border-radius:14px;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(30,58,138,.25);transition:.2s}
+    .btn-start:hover{background-color:#152e72;transform:translateY(-2px)}
+    .btn-start:disabled{opacity:.6;cursor:not-allowed}
+    .tagline{margin-top:20px;font-size:13px;color:var(--text-muted);text-align:center}
+    .tagline span{color:var(--accent);font-weight:600}
+
+    /* FOOTER */
+    footer{width:100%;background:var(--card);border-top:1px solid var(--border);margin-top:auto}
+    .footer-inner{max-width:960px;margin:0 auto;padding:20px 24px;text-align:center} /* Desktop wider */
+    .brand{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px}
+    .brand span{color:var(--accent)}
+    .footer-links{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+    .footer-links a{font-size:12px;color:var(--text-muted);text-decoration:none;font-weight:600}
+    .footer-links a:hover{color:var(--accent);text-decoration:underline}
+    .copy{font-size:11px;color:var(--text-muted)}
+
+    /* DESKTOP LAYOUT */
+    @media (min-width: 768px){
+      .main-wrap{padding:60px 40px}
+      .app-logo{height:160px}
+      .footer-links{gap:24px}
+      .footer-links a{font-size:14px}
+    }
+  </style>
+</head>
+<body>
+  <div class="main-wrap">
+    <header class="app-header"><img src="Kwathu-campus-logo.png" alt="Kwathu Campus Logo" class="app-logo"></header>
+    <main class="welcome-hero">
+      <h1>Your Home Away From Home</h1>
+      <p>Find verified, affordable off-campus hostels near your university in Malawi. No scams. No stress.</p>
+      <button class="btn-start" id="start-btn">Find My Hostel</button>
+      <p class="tagline">Built for Malawi, <span>by Malawi</span></p>
+    </main>
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="brand">@Lost Loyalty <span>Development</span></div>
+      
+      <div class="footer-links">
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms & Conditions</a>
+        <a href="https://lostloyalty.dev" target="_blank" rel="noopener">Contact</a>
+      </div>
+      
+      <div class="copy">© 2026 Kwathu Campus. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <!-- Appwrite SDK -->
+  <script type="module">
+    import { Client, Account } from "https://cdn.jsdelivr.net/npm/appwrite@14.0.1/+esm";
+
+    // TODO: Replace with your actual Appwrite Project ID
+    const PROJECT_ID = 'kwathucampus'; 
+    const ENDPOINT = 'https://fra.cloud.appwrite.io/v1';
+
+    const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID);
+    const account = new Account(client);
+
+    const btn = document.getElementById('start-btn');
+
+    btn.onclick = async () => {
+      btn.disabled = true;
+      btn.textContent = 'Checking...';
+      try {
+        await account.get(); // If user is logged in
+        window.location.href = 'entrace.html'; // Go to hostel list
+      } catch {
+        window.location.href = 'entrance.html'; // Go to login/signup
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Find My Hostel';
+      }
+    };
+  </script>
+</body>
+</html>>
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>My Hostels - Kwathu</title>
+<style>
+:root{--primary:#1e3a8a;--accent:#0d9488;--bg:#f8fafc;--card:#fff;--text:#0f172a;--muted:#64748b;--border:#e2e8f0;--danger:#ef4444}
+*{box-sizing:border-box;font-family:'Segoe UI',sans-serif;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+body.loading *{visibility:hidden} /* FIX: No flash before auth */
+.header{background:var(--card);border-bottom:1px solid var(--border);padding:12px 20px;position:sticky;top:0;z-index:10}
+.header-inner{max-width:1000px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+.menu-wrap{position:relative}
+.menu-btn{background:0;border:0;font-size:24px;cursor:pointer;color:var(--text);padding:4px 8px}
+.dropdown{display:none;position:absolute;top:100%;left:0;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.1);min-width:200px;z-index:20;overflow:hidden}
+.dropdown.open{display:block}
+.dropdown a,.dropdown button{display:block;width:100%;text-align:left;padding:12px 16px;font-size:14px;color:var(--text);text-decoration:none;background:0;border:0;cursor:pointer;font-weight:600}
+.dropdown a:hover,.dropdown button:hover{background:var(--bg)}
+.dropdown hr{border:0;border-top:1px solid var(--border);margin:4px 0}
+.dropdown.danger{color:var(--danger)}
+.logo{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:800;color:var(--primary)}
+.logo img{height:28px;width:auto}
+.btn{padding:10px 14px;background:var(--primary);border:0;border-radius:10px;color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:14px}
+.btn-muted{background:var(--card);color:var(--muted);border:1px solid var(--border)}
+.container{max-width:1000px;margin:0 auto;padding:20px;width:100%;flex:1}
+.welcome-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+.stat-box{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center}
+.stat-value{font-size:20px;font-weight:800;color:var(--accent)}
+.stat-label{font-size:11px;color:var(--muted);margin-top:4px}
+.section-title{font-size:16px;font-weight:700;margin:24px 0 12px;display:flex;justify-content:space-between}
+.hostel-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:12px}
+@media(min-width:768px){.hostel-card{display:flex;align-items:center;justify-content:space-between}}
+.hostel-top{display:flex;gap:12px;flex:1}
+.hostel-img{width:80px;height:80px;border-radius:12px;object-fit:cover;background:var(--bg)}
+.hostel-actions{display:flex;gap:8px;margin-top:12px}
+@media(min-width:768px){.hostel-actions{margin-top:0;min-width:220px}}
+.btn-sm{padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);flex:1;background:var(--card);color:var(--text)}
+.btn-sm.danger{border-color:var(--danger);color:var(--danger)}
+.btn-sm.warn{border-color:#f59e0b;color:#f59e0b}
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;align-items:center;justify-content:center;padding:20px}
+.modal.open{display:flex}
+.modal-box{background:var(--card);max-width:400px;width:100%;border-radius:16px;padding:20px}
+footer{width:100%;background:var(--card);border-top:1px solid var(--border);margin-top:auto}
+.footer-inner{max-width:960px;margin:0 auto;padding:20px 24px;text-align:center}
+.brand{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px}
+.brand span{color:var(--accent)}
+.footer-links{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+.footer-links a{font-size:12px;color:var(--muted);text-decoration:none;font-weight:600}
+.copy{font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body class="loading">
+<header class="header">
+  <div class="header-inner">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="menu-wrap">
+        <button class="menu-btn" id="menuBtn">☰</button>
+        <div class="dropdown" id="dropdown">
+          <a href="landlord-post.html">+ Post Hostel</a>
+          <a href="landlord-profile.html">Profile Settings</a>
+          <a href="mailto:support@kwathu.com">Contact Support</a>
+          <hr>
+          <button class="danger" id="deleteBtnMenu">Delete Account</button>
+        </div>
+      </div>
+      <div class="logo"><img src="Kwathu-campus-logo.png" alt="Kwathu" onerror="this.style.display='none'">Kwathu Campus</div>
+    </div>
+    <button class="btn btn-muted" id="logoutBtn">Logout</button>
+  </div>
+</header>
+
+<main class="container">
+  <div class="welcome-card">
+    <div style="font-size:14px;color:var(--muted);">Welcome back,</div>
+    <div style="font-size:18px;font-weight:800;" id="landlordName">Loading...</div>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-value" id="totalHostels">0</div><div class="stat-label">Total Hostels</div></div>
+      <div class="stat-box"><div class="stat-value" id="availableHostels">0</div><div class="stat-label">Available</div></div>
+      <div class="stat-box"><div class="stat-value" id="rentedHostels">0</div><div class="stat-label">Rented</div></div>
+    </div>
+  </div>
+
+  <div class="section-title">
+    <span>Your Hostels</span>
+    <span style="font-size:12px;color:var(--muted);" id="hostelCount">0</span>
+  </div>
+
+  <div id="hostelsList"><div class="empty">Loading...</div></div>
+</main>
+
+<footer><div class="footer-inner"><div class="brand">@Lost Loyalty <span>Development</span></div><div class="footer-links"><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms & Conditions</a><a href="https://lostloyalty.dev" target="_blank" rel="noopener">Contact</a></div><div class="copy">© 2026 Kwathu Campus. All rights reserved.</div></div></footer>
+
+<div id="confirmModal" class="modal">
+  <div class="modal-box">
+    <h3 style="margin-bottom:8px">Are you sure?</h3>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:16px">Type <b>DELETE</b> to confirm. Account locked for 10 days.</p>
+    <input id="confirmInput" placeholder="DELETE" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;margin-bottom:12px">
+    <div style="display:flex;gap:8px"><button class="btn btn-muted" style="flex:1" id="cancelDel">Cancel</button><button class="btn" style="flex:1;background:var(--danger)" id="confirmDel">Delete</button></div>
+  </div>
+</div>
+
+<script type="module">
+import { Client, Account, Databases, Query } from 'https://cdn.jsdelivr.net/npm/appwrite@14.0.1/+esm'
+
+const ENDPOINT = 'https://fra.cloud.appwrite.io/v1';
+const PROJECT_ID = 'kwathucampus';
+const DATABASE_ID = 'Kwathuhostel';
+const LANDLORDS_COLLECTION = 'landlords';
+const HOSTELS_COLLECTION = 'hostels';
+
+const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID);
+const account = new Account(client);
+const databases = new Databases(client);
+
+let landlordDocId=null;
+
+// 1. FIX: PROTECT PAGE + LOAD LANDLORD - Appwrite way
+(async ()=>{
+  try{
+    const user = await account.get(); // If no session -> throws error
+    const res = await databases.listDocuments(DATABASE_ID, LANDLORDS_COLLECTION, [Query.equal('user_id', user.$id), Query.limit(1)]);
+    if(res.documents.length===0) throw new Error('Account not found');
+    const landlord = res.documents[0];
+    landlordDocId = landlord.$id;
+    document.getElementById('landlordName').textContent = landlord.name || 'Landlord';
+    document.body.classList.remove('loading'); // Show page
+    await loadHostels();
+  }catch{
+    location.href='landlord-auth.html'; // Kick to login
+  }
+})();
+
+// MENU + LOGOUT
+const menuBtn=document.getElementById('menuBtn'),dropdown=document.getElementById('dropdown');
+menuBtn.onclick=(e)=>{e.stopPropagation();dropdown.classList.toggle('open');};
+document.onclick=()=>dropdown.classList.remove('open');
+document.getElementById('logoutBtn').onclick = async () => {
+  await account.deleteSession('current');
+  location.href='landlord-auth.html';
+}
+
+// 2. LOAD ALL HOSTELS + STATS - Appwrite way
+async function loadHostels(){
+  const res = await databases.listDocuments(DATABASE_ID, HOSTELS_COLLECTION, [Query.equal('landlord_id', landlordDocId), Query.orderDesc('$createdAt'), Query.limit(100)]);
+  const hostels = res.documents || [];
+
+  const total = hostels.length;
+  const available = hostels.filter(h => h.status==='available').length;
+  const rented = hostels.filter(h => h.status==='rented').length;
+
+  document.getElementById('totalHostels').textContent = total;
+  document.getElementById('availableHostels').textContent = available;
+  document.getElementById('rentedHostels').textContent = rented;
+  document.getElementById('hostelCount').textContent = total;
+
+  const list = document.getElementById('hostelsList');
+  if(total===0){
+    list.innerHTML = `<div class="empty"><div>No hostels yet</div><a href="landlord-post.html" class="btn" style="margin-top:12px">Post Your First One</a></div>`;
+    return;
+  }
+
+  list.innerHTML = hostels.map(h => `
+    <div class="hostel-card">
+      <div class="hostel-top">
+        <img src="${h.images?.[0] || 'https://placehold.co/80x80/e2e8f0/64748b?text=No+Pic'}" class="hostel-img" alt="${h.name}">
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:700;margin-bottom:4px">${h.name}</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:4px">${h.university} • ${h.location} • ${h.room_type}</div>
+          <div style="font-size:16px;font-weight:800;color:var(--accent)">MK ${Number(h.price).toLocaleString()}/month</div>
+          <div style="font-size:11px;color:${h.status==='available'?'var(--accent)':'var(--danger)'};margin-top:4px;font-weight:700;">
+            ${h.status?.toUpperCase() || 'AVAILABLE'}
+          </div>
+        </div>
+      </div>
+      <div class="hostel-actions">
+        <button class="btn-sm warn" onclick="toggleStatus('${h.$id}', '${h.status}')">${h.status==='available'? 'Mark Rented' : 'Mark Available'}</button>
+        <button class="btn-sm" onclick="editHostel('${h.$id}')">Edit</button>
+        <button class="btn-sm danger" onclick="deleteHostel('${h.$id}')">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// 3. FULL ACTIONS - Appwrite way
+window.toggleStatus = async (id, current) => {
+  const newStatus = current==='available'? 'rented' : 'available';
+  await databases.updateDocument(DATABASE_ID, HOSTELS_COLLECTION, id, { status: newStatus });
+  loadHostels();
+}
+
+window.deleteHostel = async (id) => {
+  if(!confirm('Delete this hostel? This cannot be undone.')) return;
+  await databases.deleteDocument(DATABASE_ID, HOSTELS_COLLECTION, id);
+  loadHostels();
+}
+
+window.editHostel = (id) => {
+  location.href = `landlord-post.html?id=${id}`;
+}
+
+// 4. DELETE ACCOUNT 10-DAY BLOCK
+const modal=document.getElementById('confirmModal');
+document.getElementById('deleteBtnMenu').onclick=()=>{dropdown.classList.remove('open');modal.classList.add('open');};
+document.getElementById('cancelDel').onclick=()=>modal.classList.remove('open');
+document.getElementById('confirmDel').onclick=async()=>{
+  if(document.getElementById('confirmInput').value!=='DELETE'){alert('Type DELETE to confirm');return;}
+  await databases.updateDocument(DATABASE_ID, LANDLORDS_COLLECTION, landlordDocId, {status:'deleted', deleted_at: new Date().toISOString()});
+  await account.deleteSession('current');
+  alert('Account deleted. You can return in 10 days.');
+  location.href='index.html';
+}
+</script>
+</body>
+</html>upabase.auth.signOut();
+      window.location.href = 'landlord-login.html';
+    }
+  </script>
+  </body>
+</html>}</span>
+          </div>
+          ${statusHTML}
+          ${actionHTML}
+        </div>
+      `;
+      return div;
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('kwathu_landlord_phone');
+      localStorage.removeItem('kwathu_landlord_name');
+      window.location.href = 'landlord-login.html';
+    });
+  </script>
+</body>
+</html>l>

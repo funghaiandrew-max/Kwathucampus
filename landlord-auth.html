@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Landlord Login - Kwathu</title>
+<style>
+:root{--primary:#1e3a8a;--accent:#0d9488;--bg:#f8fafc;--card:#fff;--text:#0f172a;--muted:#64748b;--border:#e2e8f0;--danger:#ef4444}
+*{box-sizing:border-box;font-family:'Segoe UI',sans-serif;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+body.loading *{visibility:hidden} /* FIX: Hide until auth check */
+.wrap{max-width:480px;width:100%;margin:40px auto;padding:20px;flex:1}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;box-shadow:0 8px 30px rgba(0,0,0,.06)}
+.logo-wrap{text-align:center;margin-bottom:16px}
+.logo-wrap img{height:60px;width:auto}
+h1{color:var(--primary);text-align:center;margin-bottom:8px;font-size:clamp(22px,4vw,28px)}
+.sub{color:var(--muted);text-align:center;font-size:14px;margin-bottom:16px}
+label{display:block;font-size:14px;font-weight:600;margin-top:12px;color:var(--muted)}
+input{width:100%;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:10px;margin-top:6px;font-size:15px}
+input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px rgba(13,148,136,.1)}
+.show-wrap{display:flex;align-items:center;gap:8px;margin-top:8px}
+.show-wrap input[type=checkbox]{width:16px;height:16px;margin:0}
+.show-wrap label{margin:0;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer}
+button{width:100%;padding:14px;background:var(--primary);border:0;border-radius:12px;color:#fff;font-weight:700;margin-top:12px;cursor:pointer;font-size:16px;transition:.2s}
+button:hover{background:#152e72}
+button:disabled{opacity:.5;cursor:not-allowed}
+.tab{display:flex;gap:8px;margin:16px 0}
+.tab button{flex:1;background:var(--card);color:var(--muted);border:1px solid var(--border);margin:0}
+.tab button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.error{background:rgba(239,68,68,.1);border:1px solid var(--danger);color:var(--danger);padding:12px;border-radius:10px;display:none;margin-top:12px;font-size:13px}
+footer{width:100%;background:var(--card);border-top:1px solid var(--border);margin-top:auto}
+.footer-inner{max-width:960px;margin:0 auto;padding:20px 24px;text-align:center}
+.brand{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px}
+.brand span{color:var(--accent)}
+.footer-links{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+.footer-links a{font-size:12px;color:var(--muted);text-decoration:none;font-weight:600}
+.copy{font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body class="loading"> <!-- FIX: Start hidden -->
+<div class="wrap">
+  <div class="card">
+    <div class="logo-wrap">
+      <img src="Kwathu-campus-logo.png" alt="Kwathu Campus Logo" onerror="this.style.display='none'">
+    </div>
+    <h1>Landlord Portal</h1>
+    <p class="sub">List your hostels and get verified students</p>
+
+    <div class="tab">
+      <button type="button" id="loginTab" class="active">Login</button>
+      <button type="button" id="signupTab">Sign Up</button>
+    </div>
+
+    <form id="authForm">
+      <div id="nameField" style="display:none">
+        <label>Name *</label>
+        <input id="name" placeholder="Mr Banda">
+      </div>
+      <label>Email *</label>
+      <input type="email" id="email" required>
+      <label>Password *</label>
+      <input type="password" id="password" minlength="8" required>
+      <div class="show-wrap">
+        <input type="checkbox" id="showPassCheck">
+        <label for="showPassCheck">Show password</label>
+      </div>
+      <label>WhatsApp *</label>
+      <input type="tel" id="phone" placeholder="26599XXXXXXX" required>
+      <button id="submitBtn">Login</button>
+    </form>
+    <div id="errorBox" class="error"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="brand">@Lost Loyalty <span>Development</span></div>
+    <div class="footer-links">
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms & Conditions</a>
+      <a href="https://lostloyalty.dev" target="_blank" rel="noopener">Contact</a>
+    </div>
+    <div class="copy">© 2026 Kwathu Campus. All rights reserved.</div>
+  </div>
+</footer>
+
+<script type="module">
+import { Client, Account, Databases, ID, Query } from 'https://cdn.jsdelivr.net/npm/appwrite@14.0.1/+esm'
+
+const ENDPOINT = 'https://fra.cloud.appwrite.io/v1';
+const PROJECT_ID = 'kwathucampus';
+const DATABASE_ID = 'Kwathuhostel';
+const LANDLORDS_COLLECTION = 'landlords';
+
+const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID);
+const account = new Account(client);
+const databases = new Databases(client);
+
+// FIX 1: AUTO-REDIRECT IF ALREADY LOGGED IN. No more "session active" error
+(async ()=>{
+  try{
+    await account.get(); // If this succeeds = session active
+    location = 'landlord-dashboard.html'; // Kick to dashboard
+  }catch{
+    document.body.classList.remove('loading'); // Not logged in, show form
+  }
+})();
+
+let mode='login';
+const loginTab=document.getElementById('loginTab'),signupTab=document.getElementById('signupTab'),nameField=document.getElementById('nameField'),submitBtn=document.getElementById('submitBtn'),errorBox=document.getElementById('errorBox'),passwordInput=document.getElementById('password'),showPassCheck=document.getElementById('showPassCheck');
+
+showPassCheck.onchange=()=>{
+  passwordInput.type=showPassCheck.checked?'text':'password';
+};
+
+function setMode(m){
+  mode=m;
+  if(m==='login'){
+    loginTab.classList.add('active');signupTab.classList.remove('active');
+    nameField.style.display='none';submitBtn.textContent='Login';
+  }else{
+    signupTab.classList.add('active');loginTab.classList.remove('active');
+    nameField.style.display='block';submitBtn.textContent='Create Account';
+  }
+  errorBox.style.display='none';
+}
+loginTab.onclick=()=>setMode('login');
+signupTab.onclick=()=>setMode('signup');
+
+async function checkCooldown(email,phone){
+  const res = await databases.listDocuments(DATABASE_ID, LANDLORDS_COLLECTION, [
+    Query.or([Query.equal('email', email), Query.equal('phone', phone)]),
+    Query.limit(1)
+  ]);
+  const acc = res.documents[0];
+  if(acc && acc.status==='deleted' && acc.deleted_at){
+    const daysLeft = 10 - Math.floor((Date.now() - new Date(acc.deleted_at)) / 86400000);
+    if(daysLeft > 0) throw new Error(`Account deleted. You can create a new one in ${daysLeft} day(s).`);
+  }
+  return acc;
+}
+
+document.getElementById('authForm').addEventListener('submit',async e=>{
+  e.preventDefault();submitBtn.disabled=true;errorBox.style.display='none';
+  const email=document.getElementById('email').value.trim();
+  const password=document.getElementById('password').value;
+  const phone=document.getElementById('phone').value.trim();
+  const name=document.getElementById('name').value.trim();
+
+  try{
+    if(mode==='signup'){
+      if(!name||!phone)throw new Error('Enter name + WhatsApp');
+      await checkCooldown(email,phone);
+      const user = await account.create(ID.unique(), email, password, name);
+      await databases.createDocument(DATABASE_ID, LANDLORDS_COLLECTION, ID.unique(), {
+        user_id: user.$id,
+        name, phone, email, status: 'active'
+      });
+      alert('Account created! You can login now.');
+      setMode('login');
+    }else{
+      const acc = await checkCooldown(email,phone);
+      if(acc?.status==='deleted'){
+        const daysLeft=10-Math.floor((Date.now()-new Date(acc.deleted_at))/86400000);
+        if(daysLeft>0)throw new Error(`Account deleted. Return in ${daysLeft} day(s).`);
+      }
+      await account.createEmailPasswordSession(email, password);
+      await account.get();
+      window.location.href='landlord-dashboard.html';
+    }
+  }catch(err){
+    errorBox.textContent=err.message;
+    errorBox.style.display='block';
+    submitBtn.disabled=false;
+  }
+});
+</script>
+</body>
+</html>

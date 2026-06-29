@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Profile - Kwathu</title>
+<style>
+:root{--primary:#1e3a8a;--accent:#0d9488;--bg:#f8fafc;--card:#fff;--text:#0f172a;--muted:#64748b;--border:#e2e8f0;--danger:#ef4444}
+*{box-sizing:border-box;font-family:'Segoe UI',sans-serif;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+body.loading *{visibility:hidden}
+.header{background:var(--card);border-bottom:1px solid var(--border);padding:12px 20px;position:sticky;top:0;z-index:10}
+.header-inner{max-width:1000px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+.menu-wrap{position:relative}
+.menu-btn{background:0;border:0;font-size:24px;cursor:pointer;color:var(--text);padding:4px 8px}
+.dropdown{display:none;position:absolute;top:100%;left:0;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.1);min-width:200px;z-index:20;overflow:hidden}
+.dropdown.open{display:block}
+.dropdown a,.dropdown button{display:block;width:100%;text-align:left;padding:12px 16px;font-size:14px;color:var(--text);text-decoration:none;background:0;border:0;cursor:pointer;font-weight:600}
+.dropdown a:hover,.dropdown button:hover{background:var(--bg)}
+.dropdown hr{border:0;border-top:1px solid var(--border);margin:4px 0}
+.dropdown.danger{color:var(--danger)}
+.logo{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:800;color:var(--primary)}
+.logo img{height:28px;width:auto}
+.btn{padding:10px 14px;background:var(--primary);border:0;border-radius:10px;color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:14px}
+.btn-muted{background:var(--card);color:var(--muted);border:1px solid var(--border)}
+.container{max-width:600px;margin:0 auto;padding:20px;width:100%;flex:1}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px;box-shadow:0 4px 20px rgba(0,0,0,.04)}
+.card h2{font-size:18px;margin-bottom:16px;color:var(--primary)}
+label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:12px 0 6px}
+input{width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;font-size:15px}
+input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px rgba(13,148,136,.1)}
+.show-wrap{display:flex;align-items:center;gap:8px;margin-top:8px}
+.show-wrap input[type=checkbox]{width:16px;height:16px;margin:0}
+.show-wrap label{margin:0;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer}
+button.btn{width:100%;padding:14px;margin-top:16px;border:0;border-radius:12px;background:var(--primary);color:#fff;font-weight:700;font-size:15px;cursor:pointer}
+button.btn:disabled{opacity:.5}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.stat-box{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center}
+.stat-value{font-size:20px;font-weight:800;color:var(--accent)}
+.ok{color:var(--accent);font-size:13px;margin-top:10px;text-align:center;font-weight:600;display:none}
+.error{color:var(--danger);font-size:13px;margin-top:10px;text-align:center;font-weight:600;display:none}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;align-items:center;justify-content:center;padding:20px}
+.modal.open{display:flex}
+.modal-box{background:var(--card);max-width:400px;width:100%;border-radius:16px;padding:20px}
+footer{width:100%;background:var(--card);border-top:1px solid var(--border);margin-top:auto}
+.footer-inner{max-width:960px;margin:0 auto;padding:20px 24px;text-align:center}
+.brand{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px}
+.brand span{color:var(--accent)}
+.footer-links{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+.footer-links a{font-size:12px;color:var(--muted);text-decoration:none;font-weight:600}
+.footer-links a:hover{color:var(--accent);text-decoration:underline}
+.copy{font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body class="loading">
+<header class="header">
+  <div class="header-inner">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="menu-wrap">
+        <button class="menu-btn" id="menuBtn">☰</button>
+        <div class="dropdown" id="dropdown">
+          <a href="landlord-dashboard.html">Dashboard</a>
+          <a href="landlord-post.html">+ Post Hostel</a>
+          <a href="mailto:support@kwathu.com">Contact Support</a>
+          <hr>
+          <button class="danger" id="deleteBtnMenu">Delete Account</button>
+        </div>
+      </div>
+      <div class="logo">
+        <img src="Kwathu-campus-logo.png" alt="Kwathu" onerror="this.style.display='none'">
+        Profile
+      </div>
+    </div>
+    <button class="btn btn-muted" id="logoutBtn">Logout</button>
+  </div>
+</header>
+
+<main class="container">
+  <div class="card">
+    <h2>Your Stats</h2>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-value" id="totalHostels">0</div><div style="font-size:11px;color:var(--muted)">Total</div></div>
+      <div class="stat-box"><div class="stat-value" id="availableHostels">0</div><div style="font-size:11px;color:var(--muted)">Available</div></div>
+      <div class="stat-box"><div class="stat-value" id="rentedHostels">0</div><div style="font-size:11px;color:var(--muted)">Rented</div></div>
+    </div>
+  </div>
+
+  <form class="card" id="profileForm">
+    <h2>Account Info</h2>
+    <label>Name *</label>
+    <input id="name" required>
+    <label>WhatsApp *</label>
+    <input id="phone" type="tel" required placeholder="26599XXXXXXX">
+    <button class="btn" id="saveBtn">Save Changes</button>
+    <div class="ok" id="okMsg">Saved ✅</div>
+    <div class="error" id="errMsg"></div>
+  </form>
+
+  <form class="card" id="passForm">
+    <h2>Change Password</h2>
+    <label>Current Password *</label>
+    <input id="oldPass" type="password" required>
+    <label>New Password *</label>
+    <input id="newPass" type="password" minlength="8" required>
+    <div class="show-wrap">
+      <input type="checkbox" id="showPassCheck">
+      <label for="showPassCheck">Show password</label>
+    </div>
+    <button class="btn" id="passBtn">Update Password</button>
+    <div class="ok" id="passOk">Password Updated ✅</div>
+    <div class="error" id="passErr"></div>
+  </form>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="brand">@Lost Loyalty <span>Development</span></div>
+    <div class="footer-links">
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms & Conditions</a>
+      <a href="https://lostloyalty.dev" target="_blank" rel="noopener">Contact</a>
+    </div>
+    <div class="copy">© 2026 Kwathu Campus. All rights reserved.</div>
+  </div>
+</footer>
+
+<div id="confirmModal" class="modal">
+  <div class="modal-box">
+    <h3 style="margin-bottom:8px">Are you sure?</h3>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:16px">Type <b>DELETE</b> to confirm. Account locked for 10 days.</p>
+    <input id="confirmInput" placeholder="DELETE" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;margin-bottom:12px">
+    <div style="display:flex;gap:8px"><button class="btn btn-muted" style="flex:1" id="cancelDel">Cancel</button><button class="btn" style="flex:1;background:var(--danger)" id="confirmDel">Delete</button></div>
+  </div>
+</div>
+
+<script type="module">
+import { Client, Account, Databases, Query } from 'https://cdn.jsdelivr.net/npm/appwrite@14.0.1/+esm'
+
+const ENDPOINT = 'https://fra.cloud.appwrite.io/v1';
+const PROJECT_ID = 'kwathucampus';
+const DATABASE_ID = 'Kwathuhostel';
+const LANDLORDS_COLLECTION = 'landlords';
+const HOSTELS_COLLECTION = 'hostels';
+
+const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID);
+const account = new Account(client);
+const databases = new Databases(client);
+
+let landlordDocId=null, userId=null;
+
+// AUTH + LOAD DATA
+(async ()=>{
+  try{
+    const user = await account.get();
+    userId = user.$id;
+    const res = await databases.listDocuments(DATABASE_ID, LANDLORDS_COLLECTION, [Query.equal('user_id', userId), Query.limit(1)]);
+    if(res.documents.length===0) throw new Error();
+    const data = res.documents[0];
+    landlordDocId = data.$id;
+    document.getElementById('name').value = data.name;
+    document.getElementById('phone').value = data.phone;
+    loadStats();
+    document.body.classList.remove('loading');
+  }catch{
+    location='landlord-auth.html';
+  }
+})();
+
+// MENU
+const menuBtn=document.getElementById('menuBtn'),dropdown=document.getElementById('dropdown');
+menuBtn.onclick=(e)=>{e.stopPropagation();dropdown.classList.toggle('open');};
+document.onclick=()=>dropdown.classList.remove('open');
+document.getElementById('logoutBtn').onclick=async()=>{await account.deleteSession('current');location='landlord-auth.html';};
+
+// STATS
+async function loadStats(){
+  const res = await databases.listDocuments(DATABASE_ID, HOSTELS_COLLECTION, [Query.equal('landlord_id', landlordDocId), Query.limit(100)]);
+  const hostels = res.documents;
+  document.getElementById('totalHostels').textContent=hostels.length;
+  document.getElementById('availableHostels').textContent=hostels.filter(h=>h.status==='available').length;
+  document.getElementById('rentedHostels').textContent=hostels.filter(h=>h.status==='rented').length;
+}
+
+// PROFILE UPDATE
+document.getElementById('profileForm').onsubmit=async e=>{
+  e.preventDefault();
+  const name=document.getElementById('name').value.trim();
+  const phone=document.getElementById('phone').value.trim();
+  const btn=document.getElementById('saveBtn');btn.disabled=true;
+  try{
+    await databases.updateDocument(DATABASE_ID, LANDLORDS_COLLECTION, landlordDocId, {name, phone});
+    document.getElementById('okMsg').style.display='block';
+    document.getElementById('errMsg').style.display='none';
+    setTimeout(()=>document.getElementById('okMsg').style.display='none',3000);
+  }catch(err){
+    document.getElementById('errMsg').textContent=err.message;
+    document.getElementById('errMsg').style.display='block';
+  }
+  btn.disabled=false;
+};
+
+// PASSWORD UPDATE
+document.getElementById('showPassCheck').onchange=()=>{
+  const type=document.getElementById('showPassCheck').checked?'text':'password';
+  document.getElementById('oldPass').type=type;
+  document.getElementById('newPass').type=type;
+};
+
+document.getElementById('passForm').onsubmit=async e=>{
+  e.preventDefault();
+  const oldPass=document.getElementById('oldPass').value;
+  const newPass=document.getElementById('newPass').value;
+  const btn=document.getElementById('passBtn');btn.disabled=true;
+  try{
+    await account.updatePassword(newPass, oldPass);
+    document.getElementById('passOk').style.display='block';
+    document.getElementById('passErr').style.display='none';
+    e.target.reset();
+  }catch(err){
+    document.getElementById('passErr').textContent=err.message;
+    document.getElementById('passErr').style.display='block';
+  }
+  btn.disabled=false;
+};
+
+// DELETE ACCOUNT
+const modal=document.getElementById('confirmModal');
+document.getElementById('deleteBtnMenu').onclick=()=>{dropdown.classList.remove('open');modal.classList.add('open');};
+document.getElementById('cancelDel').onclick=()=>modal.classList.remove('open');
+document.getElementById('confirmDel').onclick=async()=>{
+  if(document.getElementById('confirmInput').value!=='DELETE'){alert('Type DELETE to confirm');return;}
+  await databases.updateDocument(DATABASE_ID, LANDLORDS_COLLECTION, landlordDocId, {
+    status:'deleted', deleted_at: new Date().toISOString()
+  });
+  await account.deleteSession('current');
+  alert('Account deleted. You can return in 10 days.');
+  location='index.html';
+};
+</script>
+</body>
+</html>
